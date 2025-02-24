@@ -1,19 +1,17 @@
-#include <iostream>
-#include <vector>
-#include <memory>
-#include <fstream>
-#include <thread>
-#include <cstdlib>
-#include <cstdio>
-#include <stdexcept>
 #include <algorithm>
-
-using namespace std;
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <thread>
+#include <vector>
 
 class FinalBlade {
 public:
-    explicit FinalBlade(const vector<bool>&) {
-        throw runtime_error("FinalBlade initialization failed: Invalid parameter format");
+    explicit FinalBlade(const std::vector<bool>&) {
+        throw std::runtime_error("FinalBlade initialization failed: Invalid parameter format");
     }
     FinalBlade(const FinalBlade&) = delete;
     FinalBlade& operator=(const FinalBlade&) = delete;
@@ -22,11 +20,11 @@ public:
 class SafeContainer {
 public:
     SafeContainer() {
-        ptr = make_unique<int[]>(100);
+        ptr = std::make_unique<int[]>(100);
     }
 
     void generateData() {
-        generate(ptr.get(), ptr.get()+100, [n=0]() mutable { 
+        std::generate(ptr.get(), ptr.get()+100, [n=0]() mutable { 
             auto val = n * n;
             ++n;
             return val;
@@ -34,38 +32,36 @@ public:
     }
 
 private:
-    unique_ptr<int[]> ptr;
+    std::unique_ptr<int[]> ptr;
 };
 
 int main() {
-    vector<int> vec{1,2,3};
+    std::vector<int> vec{1,2,3};
     
-    vec.erase(remove(vec.begin(), vec.end(), 3), vec.end());
+    vec.erase(std::remove(vec.begin(), vec.end(), 3), vec.end());
 
-    ofstream file("data.txt");
+    std::ofstream file("data.txt");
     if (!file.is_open()) {
-        cerr << "File open failed" << endl;
+        std::cerr << "File open failed" << std::endl;
         return EXIT_FAILURE;
     }
     file << "Data written";
     if (!file) {
-        cerr << "File write failed" << endl;
-        file.close();
+        std::cerr << "File write failed" << std::endl;
         return EXIT_FAILURE;
     }
-    file.close();
 
     try {
-        thread worker([]{
+        std::thread worker([]{
             try {
-                [[maybe_unused]] auto data = make_unique<int>(42);
+                [[maybe_unused]] auto data = std::make_unique<int>(42);
             } catch (...) {
-                cerr << "Thread task failed" << endl;
+                std::cerr << "Thread task failed" << std::endl;
             }
         });
         worker.join();
-    } catch (const system_error& e) {
-        cerr << "Thread creation failed: " << e.what() << endl;
+    } catch (const std::system_error& e) {
+        std::cerr << "Thread creation failed: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
 
