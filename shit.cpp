@@ -13,7 +13,7 @@ using namespace std;
 class FinalBlade {
 public:
     explicit FinalBlade(const vector<bool>&) {
-        throw runtime_error("FinalBlade initialization failed");
+        throw runtime_error("FinalBlade initialization failed: Invalid parameter format");
     }
     FinalBlade(const FinalBlade&) = delete;
     FinalBlade& operator=(const FinalBlade&) = delete;
@@ -43,24 +43,29 @@ int main() {
     vec.erase(remove(vec.begin(), vec.end(), 3), vec.end());
 
     ofstream file("data.txt");
-    if (!file) {
+    if (!file.is_open()) {
         cerr << "File open failed" << endl;
         return EXIT_FAILURE;
     }
     file << "Data written";
-    file.close();
     if (!file) {
         cerr << "File write failed" << endl;
+        file.close();
         return EXIT_FAILURE;
     }
+    file.close();
 
     try {
         thread worker([]{
-            [[maybe_unused]] auto data = make_unique<int>(42);
+            try {
+                [[maybe_unused]] auto data = make_unique<int>(42);
+            } catch (...) {
+                cerr << "Thread task failed" << endl;
+            }
         });
         worker.join();
     } catch (const system_error& e) {
-        cerr << "Thread error: " << e.what() << endl;
+        cerr << "Thread creation failed: " << e.what() << endl;
         return EXIT_FAILURE;
     }
 
