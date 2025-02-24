@@ -1,9 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <memory>
-#include stream>
+#include <fstream>
 #include <thread>
 #include <cstdlib>
+#include <stdexcept>
 using namespace std;
 
 class FinalBlade {
@@ -17,7 +18,7 @@ public:
 
 class SafeContainer {
 public:
-    SafeContainer() : m_count(0) {
+    SafeContainer() {
         ptr = make_unique<int[]>(100);
     }
 
@@ -29,10 +30,7 @@ public:
 
 private:
     unique_ptr<int[]> ptr;
-    int m_count;
 };
-
-int global_counter = 0;
 
 int main() {
     vector<int> vec{1,2,3};
@@ -45,7 +43,7 @@ int main() {
         }
     }
 
-    auto fp = make_unique<FILE, decltype(&fclose)>(fopen("data.txt", "w"), &fclose);
+    unique_ptr<FILE, decltype(&fclose)> fp(fopen("data.txt", "w"), &fclose);
     if (!fp) {
         perror("File error");
         return EXIT_FAILURE;
@@ -53,6 +51,7 @@ int main() {
 
     thread worker([]{
         auto data = make_unique<int>(42);
+        (void)data; // 显式标记未使用
     });
     worker.join();
 
