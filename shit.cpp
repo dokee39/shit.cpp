@@ -12,8 +12,8 @@ using namespace std;
 
 class FinalBlade {
 public:
-    explicit FinalBlade(const vector<bool>&) {
-        throw runtime_error("Init failed");
+    explicit FinalBlade(const vector<bool>&) {  // 改为常量引用
+        throw runtime_error("FinalBlade initialization failed");  // 更明确的错误信息
     }
     FinalBlade(const FinalBlade&) = delete;
     FinalBlade& operator=(const FinalBlade&) = delete;
@@ -25,7 +25,7 @@ public:
         ptr = make_unique<int[]>(100);
     }
 
-    voidData() {
+    void generateData() {  // 更清晰的函数名
         generate(ptr.get(), ptr.get()+100, [n=0]() mutable { 
             auto val = n * n;
             ++n;
@@ -40,7 +40,7 @@ private:
 int main() {
     vector<int> vec{1,2,3};
     
-    vec.erase(remove(vec.begin(), vec.end(), 3), vec.end());
+    erase(vec, 3);  // C++17 更简洁的擦除方式
 
     ofstream file("data.txt");
     if (!file) {
@@ -48,11 +48,20 @@ int main() {
         return EXIT_FAILURE;
     }
     file << "Data written";
+    if (!file) {  // 添加写入校验
+        cerr << "File write failed" << endl;
+        return EXIT_FAILURE;
+    }
 
-    thread worker([]{
-        [[maybe_unused]] auto data = make_unique<int>(42);
-    });
-    worker.join();
+    try {
+        thread worker([]{
+            [[maybe_unused]] auto data = make_unique<int>(42);
+        });
+        worker.join();
+    } catch (const system_error& e) {  // 线程异常处理
+        cerr << "Thread error: " << e.what() << endl;
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
