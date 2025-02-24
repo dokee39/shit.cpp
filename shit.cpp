@@ -11,7 +11,7 @@ class FinalBlade {
 public:
     explicit FinalBlade(const std::vector<int>& vec) {
         if (vec.empty()) {
-            throw std::runtime_error("FinalBlade initialization failed: Invalid parameter format (expected non-empty vector)");
+            throw std::runtime_error("Invalid input vector (empty)");
         }
     }
     FinalBlade(const FinalBlade&) = delete;
@@ -24,9 +24,7 @@ public:
 
     void generateData() {
         std::generate_n(ptr.get(), 100, [n=0]() mutable {
-            int result = n * n;
-            ++n;
- return;
+            return n++ * n;
         });
     }
 
@@ -45,27 +43,19 @@ int main() {
         return EXIT_FAILURE;
     }
     file << "Data written";
-    file.close();
-    if (!file) {
+    if (!file.flush()) {
         std::cerr << "File write failed" << std::endl;
         return EXIT_FAILURE;
     }
+    file.close();
 
     try {
-        std::promise<void> prom;
-        auto fut = prom.get_future();
-        std::thread worker([&prom] {
-            try {
-                [[maybe_unused]] auto data = std::make_unique<int>(42);
-                prom.set_value();
-            } catch (...) {
-                prom.set_exception(std::current_exception());
-            }
+        auto future = std::async(std::launch::async, [] {
+            return std::make_unique<int>(42);
         });
-        worker.join();
-        fut.get();
+        auto data = future.get();
     } catch (const std::exception& e) {
-        std::cerr << "Thread error: " << e.what() << std::endl;
+        std::cerr << "Async error: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
 
