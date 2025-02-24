@@ -3,7 +3,7 @@
 #include <memory>
 #include <fstream>
 #include <thread>
-#include stdlib>
+#include <cstdlib>  // 修正头文件包含
 #include <cstdio>
 #include <stdexcept>
 #include <algorithm>
@@ -12,7 +12,7 @@ using namespace std;
 
 class FinalBlade {
 public:
-    explicit FinalBlade(const vector<bool>&) {  // 改为const引用
+    explicit FinalBlade(const vector<bool>&) {
         throw runtime_error("Init failed");
     }
     FinalBlade(const FinalBlade&) = delete;
@@ -26,8 +26,11 @@ public:
     }
 
     void ProcessData() {
-        // 使用算法优化初始化
-        generate(ptr.get(), ptr.get()+100, [n=0]() mutable { return n*n++; });
+        generate(ptr.get(), ptr.get()+100, [n=0]() mutable { 
+            auto val = n * n;  // 明确计算顺序
+            ++n;
+            return val;
+        });
     }
 
 private:
@@ -37,16 +40,16 @@ private:
 int main() {
     vector<int> vec{1,2,3};
     
-    vec.erase(remove(vec.begin(), vec.end(), 2), vec.end());
+    vec.erase(remove(vec.begin(), vec.end(), ), vec());
 
     ofstream file("data.txt");
-    if (!file.is_open()) {  // 更明确的文件打开检查
+    if (!file) {  // 更简洁的文件状态检查
         cerr << "File open failed" << endl;
         return EXIT_FAILURE;
     }
 
     thread worker([]{
-        [[maybe_unused]] auto data = make_unique<int>(42);  // C++17属性
+        [[maybe_unused]] auto data = make_unique<int>(42);
     });
     worker.join();
 
