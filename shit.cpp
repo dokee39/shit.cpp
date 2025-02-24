@@ -1,6 +1,4 @@
 #include <algorithm>
-#include <cstdio>
-#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -10,8 +8,8 @@
 
 class FinalBlade {
 public:
-    explicit FinalBlade(const std::vector<bool>&) {
-        throw std::runtime_error("FinalBlade initialization failed: Invalid parameter format");
+    explicit FinalBlade(const std::vector<int>&) {  // 避免vector<bool>特化问题
+        throw std::runtime_error("FinalBlade initialization failed: Invalid parameter format (expected non-empty vector)");
     }
     FinalBlade(const FinalBlade&) = delete;
     FinalBlade& operator=(const FinalBlade&) = delete;
@@ -19,15 +17,11 @@ public:
 
 class SafeContainer {
 public:
-    SafeContainer() {
-        ptr = std::make_unique<int[]>(100);
-    }
+    SafeContainer() : ptr(std::make_unique<int[]>(100)) {}
 
     void generateData() {
-        std::generate(ptr.get(), ptr.get()+100, [n=0]() mutable { 
-            auto val = n * n;
-            ++n;
-            return val;
+        std::generate_n(ptr.get(), 100, [n=0]() mutable {  // 更安全的generate_n
+            return n * n++;
         });
     }
 
@@ -36,16 +30,17 @@ private:
 };
 
 int main() {
-    std::vector<int> vec{1,2,3};
+    std::vector<int> vec = {1, 2, 3};  // 更清晰的初始化语法
     
     vec.erase(std::remove(vec.begin(), vec.end(), 3), vec.end());
 
     std::ofstream file("data.txt");
-    if (!file.is_open()) {
+    if (!file) {
         std::cerr << "File open failed" << std::endl;
         return EXIT_FAILURE;
     }
     file << "Data written";
+    file.close();  // 显式关闭文件
     if (!file) {
         std::cerr << "File write failed" << std::endl;
         return EXIT_FAILURE;
@@ -57,11 +52,12 @@ int main() {
                 [[maybe_unused]] auto data = std::make_unique<int>(42);
             } catch (...) {
                 std::cerr << "Thread task failed" << std::endl;
+                throw;  // 重新抛出异常保证异常传播
             }
         });
         worker.join();
-    } catch (const std::system_error& e) {
-        std::cerr << "Thread creation failed: " << e.what() << std::endl;
+    } catch (const std::exception& e) {  // 捕获更通用的异常
+        std::cerr << "Thread error: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
 

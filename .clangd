@@ -1,0 +1,21 @@
+CompileFlags:
+    Add: [
+        "-std=c++26",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Wconversion",
+        "-Wshadow",
+        "-Wunreachable-code",
+        "-Wredundant-decls",
+        "-Wnull-dereference",
+        "-Wdouble-promotion",
+        "-Wcast-qual",
+        "-Wcast-align",
+        "-Wimplicit-fallthrough",
+    ]
+    Remove: [
+    ]
+    Index:
+        # Background: Skip
+        # StandardLibrary: No
