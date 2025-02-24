@@ -4,7 +4,9 @@
 #include <fstream>
 #include <thread>
 #include <cstdlib>
+#include <cstdio>
 #include <stdexcept>
+
 using namespace std;
 
 class FinalBlade {
@@ -35,23 +37,16 @@ private:
 int main() {
     vector<int> vec{1,2,3};
     
-    for (auto it = vec.begin(); it != vec.end();) {
-        if (*it == 2) {
-            it = vec.erase(it);
-        } else {
-            ++it;
-        }
-    }
+    vec.erase(remove(vec.begin(), vec.end(), 2), vec.end());
 
-    unique_ptr<FILE, decltype(&fclose)> fp(fopen("data.txt", "w"), &fclose);
-    if (!fp) {
+    ofstream file("data.txt");
+    if (!file.is_open()) {
         perror("File error");
         return EXIT_FAILURE;
     }
 
     thread worker([]{
-        auto data = make_unique<int>(42);
-        (void)data; // 显式标记未使用
+        [[maybe_unused]] auto data = make_unique<int>(42);
     });
     worker.join();
 
