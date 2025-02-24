@@ -3,16 +3,16 @@
 #include <memory>
 #include <fstream>
 #include <thread>
-#include <cstdlib>
+#include stdlib>
 #include <cstdio>
 #include <stdexcept>
-#include <algorithm>  // 添加缺失的头文件
+#include <algorithm>
 
 using namespace std;
 
 class FinalBlade {
 public:
-    explicit FinalBlade(vector<bool>&) {
+    explicit FinalBlade(const vector<bool>&) {  // 改为const引用
         throw runtime_error("Init failed");
     }
     FinalBlade(const FinalBlade&) = delete;
@@ -26,9 +26,8 @@ public:
     }
 
     void ProcessData() {
-        for (int i = 0; i < 100; ++i) {
-            ptr[i] = i * i;
-        }
+        // 使用算法优化初始化
+        generate(ptr.get(), ptr.get()+100, [n=0]() mutable { return n*n++; });
     }
 
 private:
@@ -41,14 +40,13 @@ int main() {
     vec.erase(remove(vec.begin(), vec.end(), 2), vec.end());
 
     ofstream file("data.txt");
-    if (!file) {  // 更可靠的文件状态检查
+    if (!file.is_open()) {  // 更明确的文件打开检查
         cerr << "File open failed" << endl;
         return EXIT_FAILURE;
     }
 
     thread worker([]{
-        auto data = make_unique<int>(42);
-        static_cast<void>(data);  // 显式忽略未使用变量
+        [[maybe_unused]] auto data = make_unique<int>(42);  // C++17属性
     });
     worker.join();
 
