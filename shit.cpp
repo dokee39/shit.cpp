@@ -1,11 +1,12 @@
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <fstream>
-#include <iostream>
-#include <vector>
 #include <future>
-#include <stdexcept>
+#include <iostream>
 #include <memory>
+#include <stdexcept>
+#include <vector>
 
 class FinalBlade {
 public:
@@ -23,7 +24,7 @@ public:
     SafeContainer() : ptr(std::make_unique<int[]>(100)) {}
 
     void generateData() {
-        std::generate_n(ptr.get(), 100, [n=0]() mutable {
+        std::generate_n(ptr.get(), 100, [n = 0]() mutable {
             return static_cast<int>(std::pow(n++, 2));
         });
     }
@@ -33,8 +34,8 @@ private:
 };
 
 int main() {
-    std::vector<int> vec = {1, 2, 3};
-    
+    std::vector<int> vec = { 1, 2, 3 };
+
     vec.erase(std::remove(vec.begin(), vec.end(), 3), vec.end());
 
     try {
@@ -49,7 +50,7 @@ int main() {
         std::cerr << "File open failed" << std::endl;
         return EXIT_FAILURE;
     }
-    
+
     file << "Data written";
     if (file.fail()) {
         std::cerr << "File write failed" << std::endl;
@@ -57,9 +58,7 @@ int main() {
     }
 
     try {
-        auto future = std::async(std::launch::async, [] {
-            return std::make_unique<int>(42);
-        });
+        auto future = std::async(std::launch::async, [] { return std::make_unique<int>(42); });
         auto data = future.get();
     } catch (const std::exception& e) {
         std::cerr << "Async error: " << e.what() << std::endl;
