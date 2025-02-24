@@ -2,10 +2,10 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <memory>
-#include <stdexcept>
 #include <vector>
 #include <future>
+#include <stdexcept>
+#include <memory>
 
 class FinalBlade {
 public:
@@ -24,9 +24,7 @@ public:
 
     void generateData() {
         std::generate_n(ptr.get(), 100, [n=0]() mutable {
-            int current = n;
-            ++n;
-            return current * current;
+            return static_cast<int>(std::pow(n++, 2));
         });
     }
 
@@ -39,23 +37,22 @@ int main() {
     
     vec.erase(std::remove(vec.begin(), vec.end(), 3), vec.end());
 
-    FinalBlade blade(vec);
+    try {
+        FinalBlade blade(vec);
+    } catch (const std::runtime_error& e) {
+        std::cerr << "Construction failed: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
 
     std::ofstream file("data.txt");
-    if (!file) {
+    if (!file.is_open()) {
         std::cerr << "File open failed" << std::endl;
         return EXIT_FAILURE;
     }
     
     file << "Data written";
-    if (!file) {
+    if (file.fail()) {
         std::cerr << "File write failed" << std::endl;
-        return EXIT_FAILURE;
-    }
-    
-    file.flush();
-    if (!file) {
-        std::cerr << "File flush failed" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -64,7 +61,6 @@ int main() {
             return std::make_unique<int>(42);
         });
         auto data = future.get();
-        static_cast<void>(data);
     } catch (const std::exception& e) {
         std::cerr << "Async error: " << e.what() << std::endl;
         return EXIT_FAILURE;
